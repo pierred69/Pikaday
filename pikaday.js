@@ -205,6 +205,9 @@
         // the default flag for moment's strict date parsing
         formatStrict: false,
 
+        // close by clock outside
+        closeByClickOutside: true,
+
         // the minimum/earliest date that can be selected
         minDate: null,
         // the maximum/latest date that can be selected
@@ -420,6 +423,15 @@
         var self = this,
             opts = self.config(options);
 
+        self._onClickOutside = function(e) {
+            try {
+                self.destroy();
+            } catch(e) {
+                console.log(e);
+                // nothing
+            }
+        }
+
         self._onMouseDown = function(e)
         {
             if (!self._v) {
@@ -430,7 +442,7 @@
             if (!target) {
                 return;
             }
-
+            e.stopPropagation();
             if (!hasClass(target, 'is-disabled')) {
                 if (hasClass(target, 'pika-button') && !hasClass(target, 'is-empty') && !hasClass(target.parentNode, 'is-disabled')) {
                     self.setDate(new Date(target.getAttribute('data-pika-year'), target.getAttribute('data-pika-month'), target.getAttribute('data-pika-day')));
@@ -560,6 +572,7 @@
         self._onClick = function(e)
         {
             e = e || window.event;
+            console.log(e);
             var target = e.target || e.srcElement,
                 pEl = target;
             if (!target) {
@@ -586,6 +599,10 @@
         self.el.className = 'pika-single' + (opts.isRTL ? ' is-rtl' : '') + (opts.theme ? ' ' + opts.theme : '');
 
         addEvent(self.el, 'mousedown', self._onMouseDown, true);
+        if (opts.closeByClickOutside) {
+            addEvent(window, 'mousedown', self._onClickOutside);
+
+        }
         addEvent(self.el, 'touchend', self._onMouseDown, true);
         addEvent(self.el, 'change', self._onChange);
         if (opts.keyboardInput) {
